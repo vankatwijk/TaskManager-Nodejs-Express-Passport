@@ -1,32 +1,32 @@
 
-const mysql = require('mysql')// mysql db package
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
+//const mysql = require('mysql')// mysql db package
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const models = require('../../models');
 
-const pool = mysql.createPool({
-  connectionLimit:10,
-  host: 'localhost',
-  user: 'root',
-  password: 'pieter8883',
-  database: 'testdb'
-})
 
-function getConnection(){
-  return pool;
-}
+
 
 function emailExist(email,callback){
-  const queryString = "Select * From Users WHERE Email='"+email+"'";
-  getConnection().query(queryString,(err,rows,fields) =>{
-    return callback(rows.length,rows);
-  })
-}
-
-exports.default = (req, res, next) => {
-  res.status(200).json({
-    message: '/users'
+  models.Users.findAll({
+      where: {Email: email}
+  }).then(function(result){
+    return callback(result.length,result);
+  }).catch(function(error){
+    //no results
+    return callback(0,{});
   });
 }
+
+
+exports.default = (req, res, next) => {
+    //testarea
+    emailExist('test@gmail.com',(numberofusers,userArray)=>{
+      console.log("number of users : "+numberofusers);
+      res.status(200).json(userArray);
+    })
+}
+
 
 
 exports.signup = (req, res, next) => {
@@ -55,29 +55,25 @@ exports.signup = (req, res, next) => {
           })
 
         }else{
-          //if there was no error hashing the password then we can store this user
-          const queryString = "INSERT INTO Users (Email,PasswordHash,CreatedAt) VALUES ('"+newuser.email+"','"+hash+"',NOW())"
-          getConnection().query(queryString,[],(err,results,fields) =>{
-            if(err){
-              console.log("failed to insert new user "+err)
-              return res.sendStatus(500)
-            }
-
-            const queryString2 = "INSERT INTO Traders (TraderID) VALUES ('"+results.insertId+"')"
-            getConnection().query(queryString2,[],(err,results,fields) =>{
-              if(err){
-                console.log("failed to insert new trader "+err)
-                return res.sendStatus(500)
-              }
-
-              res.status(201).json({
-                message: '/new trader added',
-                createduser: newuser
-              });
-
-            })
-
+          models.Users.build({
+            Email: newuser.email,
+            PasswordHash: hash
           })
+          .save()
+          .then(function(task){
+            //add to the traders table
+
+            res.status(201).json({
+              message: '/new trader added',
+              createduser: newuser
+            });
+          })
+          .catch(function(error){
+            console.log("failed to insert new user "+err)
+            return res.sendStatus(500)
+          });
+
+
         }
 
 
@@ -121,27 +117,14 @@ exports.login = (req, res, next) => {
             expiresIn:"1h"
           }
         )
-
-        //update last login
-        const queryString = "UPDATE Users Set LastLoggedAt = NOW() WHERE UserID = '"+userArray[0].UserID+"'";
-        getConnection().query(queryString,[],(err,results,fields) =>{
-          if(err){
-            console.log("failed: update LastLoggedAt time stamp "+err)
-          }else{
-            console.log("sucess: update LastLoggedAt time stamp")
-
-          }
+        models.Users.update(
+          {LastLoggedAt: Date()},
+          {where: {UserID: userArray[0].UserID}}
+        ).then(function(rowsUpdated) {
+          console.log(rowsUpdated);
         })
-
-        //update logging history
-        const queryString2 = "INSERT INTO LoggingHistory (UserID,IPAddress,UserAgent,CreatedAt) VALUES ("+userArray[0].UserID+",'"+req.connection.remoteAddress+"','"+req.headers['user-agent']+"',NOW())";
-        getConnection().query(queryString2,[],(err,results,fields) =>{
-          if(err){
-            console.log("failed: update login history "+err)
-          }else{
-            console.log("sucess: update login history"+req.connection.remoteAddress)
-
-          }
+        .catch(function(error){
+          console.log("could not update");
         })
 
         console.log("you're login !!!")
@@ -149,8 +132,6 @@ exports.login = (req, res, next) => {
           message: 'you\'re login !!!',
           token: token
         });
-
-
 
       }
       console.log("Failed Auth ")
@@ -167,6 +148,5 @@ exports.login = (req, res, next) => {
   }
 
 })
-
 
 }

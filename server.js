@@ -6,4 +6,9 @@ const port = process.env.PORT || 6003;
 
 const server = http.createServer(app);
 
-server.listen(port);
+
+
+const models = require('./models');
+models.sequelize.sync().then(function(){
+    server.listen(port);
+})

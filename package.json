@@ -1,5 +1,5 @@
 {
-  "name": "rest-shop",
+  "name": "restapi",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -15,7 +15,10 @@
     "jsonwebtoken": "^8.3.0",
     "morgan": "^1.9.1",
     "mysql": "^2.16.0",
-    "nodeadmin": "^0.1.2"
+    "mysql2": "^1.6.4",
+    "nodeadmin": "^0.1.2",
+    "sequelize": "^4.41.2",
+    "sequelize-cli": "^5.3.0"
   },
   "devDependencies": {
     "ws": "3.3.2"

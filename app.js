@@ -2,12 +2,13 @@ const express = require('express');//framwork
 const app = express();
 const morgan = require('morgan');// logging request
 const bodyParser = require('body-parser'); //package for getting url encodings GET POST request
-const nodeadmin = require('nodeadmin');//mysql database managment package
+//const nodeadmin = require('nodeadmin');//mysql database managment package
+//app.use(nodeadmin(app)); //mysql database managment package
 
-app.use(nodeadmin(app)); //mysql database managment package
 
-const productRoutes =  require('./api/routes/products');
-const ordersRoutes =  require('./api/routes/orders');
+
+//const productRoutes =  require('./api/routes/products');
+//const ordersRoutes =  require('./api/routes/orders');
 const users =  require('./api/routes/users');
 const traders =  require('./api/routes/traders');
 const admins =  require('./api/routes/admin');
@@ -33,8 +34,8 @@ app.use((req, res, next) => {
 });
 
 //routes to handle request
-app.use('/products',productRoutes);
-app.use('/orders',ordersRoutes);
+//app.use('/products',productRoutes);
+//app.use('/orders',ordersRoutes);
 app.use('/users',users);
 app.use('/traders',traders);
 app.use('/admin',admins);

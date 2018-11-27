@@ -1,7 +1,7 @@
 
-const mysql = require('mysql')// mysql db package
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+
 const mysqlconnect = require('../middleware/db')
 
 
