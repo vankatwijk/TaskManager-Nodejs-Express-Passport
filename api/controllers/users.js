@@ -1,15 +1,17 @@
 
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-
-const mysqlconnect = require('../middleware/db')
-
+const models = require('../../models');
 
   function emailExist(email,callback){
-    const queryString = "Select * From Users WHERE Email='"+email+"'";
-    mysqlconnect.getConnection().query(queryString,(err,rows,fields) =>{
-      return callback(rows.length,rows);
-    })
+    models.Users.findAll({
+        where: {Email: email}
+    }).then(function(result){
+      return callback(result.length,result);
+    }).catch(function(error){
+      //no results
+      return callback(0,{});
+    });
   }
 
   exports.default = (req, res, next) => {
@@ -38,30 +40,35 @@ const mysqlconnect = require('../middleware/db')
 
       }else{
         //add user
-
-        console.log("user pass "+newuser.password);
         bcrypt.hash(newuser.password,10,(err,hash)=>{
           if(err){
             return res.status(500).json({
-              error: err
+              error5: err
             })
+
           }else{
-            //if there was no error hashing the password then we can store this user
-            const queryString = "INSERT INTO Users (Email,PasswordHash,CreatedAt) VALUES ('"+newuser.email+"','"+hash+"',NOW())"
-            mysqlconnect.getConnection().query(queryString,[],(err,results,fields) =>{
-              if(err){
-               console.log("failed to insert new user "+err)
-               return res.sendStatus(500)
-             }
-
-             res.status(201).json({
-               message: '/new user added',
-               createduser: newuser
-             });
-
+            models.Users.build({
+              Email: newuser.email,
+              PasswordHash: hash
             })
+            .save()
+            .then(function(task){
+              //add to the traders table
+
+              res.status(201).json({
+                message: '/new trader added',
+                createduser: newuser
+              });
+            })
+            .catch(function(error){
+              console.log("failed to insert new user "+err)
+              return res.sendStatus(500)
+            });
+
 
           }
+
+
         })
       }
 
@@ -101,53 +108,37 @@ const mysqlconnect = require('../middleware/db')
             {
               expiresIn:"1h"
             }
-            )
+          )
+          models.Users.update(
+            {LastLoggedAt: Date()},
+            {where: {UserID: userArray[0].UserID}}
+          ).then(function(rowsUpdated) {
+            console.log(rowsUpdated);
+          })
+          .catch(function(error){
+            console.log("could not update");
+          })
 
-            //update last login
-            const queryString = "UPDATE Users Set LastLoggedAt = NOW() WHERE UserID = '"+userArray[0].UserID+"'";
-            mysqlconnect.getConnection().query(queryString,[],(err,results,fields) =>{
-              if(err){
-               console.log("failed: update LastLoggedAt time stamp "+err)
-             }else{
-               console.log("sucess: update LastLoggedAt time stamp")
-
-             }
-            })
-
-            //update logging history
-            const queryString2 = "INSERT INTO LoggingHistory (UserID,IPAddress,UserAgent,CreatedAt) VALUES ("+userArray[0].UserID+",'"+req.connection.remoteAddress+"','"+req.headers['user-agent']+"',NOW())";
-            mysqlconnect.getConnection().query(queryString2,[],(err,results,fields) =>{
-              if(err){
-               console.log("failed: update login history "+err)
-             }else{
-               console.log("sucess: update login history"+req.connection.remoteAddress)
-
-             }
-            })
-
-            console.log("you're login !!!")
-            return res.status(201).json({
-              message: 'you\'re login !!!',
-              token: token
-            });
-
-
-
-          }
-          console.log("Failed Auth ")
+          console.log("you're login !!!")
           return res.status(201).json({
-            message: 'Failed Auth'
+            message: 'you\'re login !!!',
+            token: token
           });
-        })
-      }else{
-        console.log("can't Auth ")
+
+        }
+        console.log("Failed Auth ")
         return res.status(201).json({
-          message: 'can\'t Auth'
+          message: 'Failed Auth'
         });
+      })
+    }else{
+      console.log("can't Auth ")
+      return res.status(201).json({
+        message: 'can\'t Auth'
+      });
 
-      }
+    }
 
-    })
-
+  })
 
   }
