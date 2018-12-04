@@ -2,12 +2,14 @@ const express = require('express');//framwork
 const app = express();
 const morgan = require('morgan');// logging request
 const bodyParser = require('body-parser'); //package for getting url encodings GET POST request
+const expressValidator = require('express-validator');
+const expressSession = require('express-session');
 //const nodeadmin = require('nodeadmin');//mysql database managment package
 //app.use(nodeadmin(app)); //mysql database managment package
 
 
 
-//const productRoutes =  require('./api/routes/products');
+const productRoutes =  require('./api/routes/products');
 //const ordersRoutes =  require('./api/routes/orders');
 const users =  require('./api/routes/users');
 const traders =  require('./api/routes/traders');
@@ -17,7 +19,8 @@ const admins =  require('./api/routes/admin');
 app.use(morgan('dev'));// format for morgan logging
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
-
+app.use(expressValidator());
+app.use(expressSession({secret:'kenmoreapi123',resave:false,saveUninitialized:false}));
 
 //Cors error handling
 app.use((req, res, next) => {
@@ -34,7 +37,7 @@ app.use((req, res, next) => {
 });
 
 //routes to handle request
-//app.use('/products',productRoutes);
+app.use('/products',productRoutes);
 //app.use('/orders',ordersRoutes);
 app.use('/users',users);
 app.use('/traders',traders);

@@ -8,7 +8,7 @@ const server = http.createServer(app);
 
 
 
-const models = require('./models');
+const models = require('./api/models');
 models.sequelize.sync().then(function(){
     server.listen(port);
 })

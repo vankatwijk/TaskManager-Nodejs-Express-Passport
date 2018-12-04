@@ -1,7 +1,7 @@
 
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const models = require('../../models');
+const models = require('../models');
 
   function emailExist(email,callback){
     models.Users.findAll({
@@ -22,6 +22,16 @@ const models = require('../../models');
 
 
   exports.signup = (req, res, next) => {
+    // check input values
+    req.check('email','Invalid email address').isEmail();
+    req.check('password','password is invalid or to short').isLength({min:6}).equals(req.body.password);
+    var errors = req.validationErrors();
+    if(errors){
+    req.session.error = errors;
+    console.log("failed to insert new user ")
+    return res.status(500).json(errors)
+    }
+
     //register new user
     const newuser = {
       email: req.body.email,
@@ -78,6 +88,16 @@ const models = require('../../models');
   }
 
   exports.login = (req, res, next) => {
+    // check input values
+    req.check('email','Invalid email address').isEmail();
+    req.check('password','password is invalid or to short').isLength({min:6}).equals(req.body.password);
+    var errors = req.validationErrors();
+    if(errors){
+    req.session.error = errors;
+    console.log("failed to insert new user ")
+    return res.status(500).json(errors)
+    }
+
     //register new user
     const loginuser = {
       email: req.body.email,
@@ -94,9 +114,9 @@ const models = require('../../models');
         console.dir(userArray[0].Email)
         bcrypt.compare(loginuser.password,userArray[0].PasswordHash,(err,result)=>{
           if(err){
-            console.log("can't Auth ")
+            console.log("invalid_grant")
             return res.status(201).json({
-              message: 'can\'t Auth'
+              message: 'invalid_grant'
             });
           }
           if(result){
@@ -116,25 +136,25 @@ const models = require('../../models');
             console.log(rowsUpdated);
           })
           .catch(function(error){
-            console.log("could not update");
+            console.log("Could not update");
           })
 
-          console.log("you're login !!!")
+          console.log("Access granted")
           return res.status(201).json({
-            message: 'you\'re login !!!',
+            message: 'granted',
             token: token
           });
 
         }
         console.log("Failed Auth ")
         return res.status(201).json({
-          message: 'Failed Auth'
+          message: 'invalid_grant'
         });
       })
     }else{
       console.log("can't Auth ")
       return res.status(201).json({
-        message: 'can\'t Auth'
+        message: 'invalid_grant'
       });
 
     }

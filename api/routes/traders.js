@@ -3,7 +3,7 @@ const router = express.Router();
 const userController = require('../controllers/traders')
 
 
-router.get('/',userController.default);
+//router.get('/',userController.default);
 router.post('/signup',userController.signup);
 router.post('/login',userController.login);
 

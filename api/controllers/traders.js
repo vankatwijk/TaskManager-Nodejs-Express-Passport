@@ -2,7 +2,7 @@
 //const mysql = require('mysql')// mysql db package
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const models = require('../../models');
+const models = require('../models');
 
 
 
@@ -19,18 +19,20 @@ function emailExist(email,callback){
 }
 
 
-exports.default = (req, res, next) => {
-    //testarea
-    emailExist('test@gmail.com',(numberofusers,userArray)=>{
-      console.log("number of users : "+numberofusers);
-      res.status(200).json(userArray);
-    })
-}
-
-
-
 exports.signup = (req, res, next) => {
   //register new user
+
+  // check input values
+  req.check('email','Invalid email address').isEmail();
+  req.check('password','password is invalid or to short').isLength({min:6}).equals(req.body.password);
+  var errors = req.validationErrors();
+  if(errors){
+    req.session.error = errors;
+    console.log("failed to insert new user ")
+    return res.status(500).json(errors)
+  }
+
+  // if check is okay start inserting new user
   const newuser = {
     email: req.body.email,
     password: req.body.password
@@ -87,6 +89,16 @@ exports.signup = (req, res, next) => {
 
 exports.login = (req, res, next) => {
   //register new user
+  // check input values
+  req.check('email','Invalid email address').isEmail();
+  req.check('password','password is invalid or to short').isLength({min:6}).equals(req.body.password);
+  var errors = req.validationErrors();
+  if(errors){
+    req.session.error = errors;
+    console.log("failed to insert new user ")
+    return res.status(500).json(errors)
+  }
+
   const loginuser = {
     email: req.body.email,
     password: req.body.password
@@ -102,9 +114,9 @@ exports.login = (req, res, next) => {
       console.dir(userArray[0].Email)
       bcrypt.compare(loginuser.password,userArray[0].PasswordHash,(err,result)=>{
         if(err){
-          console.log("can't Auth ")
+          console.log("invalid_grant")
           return res.status(201).json({
-            message: 'can\'t Auth'
+            message: 'invalid_grant'
           });
         }
         if(result){
@@ -124,25 +136,25 @@ exports.login = (req, res, next) => {
           console.log(rowsUpdated);
         })
         .catch(function(error){
-          console.log("could not update");
+          console.log("Could not update");
         })
 
-        console.log("you're login !!!")
+        console.log("Access granted")
         return res.status(201).json({
-          message: 'you\'re login !!!',
+          message: 'granted',
           token: token
         });
 
       }
       console.log("Failed Auth ")
       return res.status(201).json({
-        message: 'Failed Auth'
+        message: 'invalid_grant'
       });
     })
   }else{
     console.log("can't Auth ")
     return res.status(201).json({
-      message: 'can\'t Auth'
+      message: 'invalid_grant'
     });
 
   }
