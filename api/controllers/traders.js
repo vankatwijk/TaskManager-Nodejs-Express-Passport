@@ -19,6 +19,31 @@ function emailExist(email,callback){
 }
 
 
+exports.getuserinfo = (req , res, next ) => {
+
+  const decoded = req.userData;
+  console.log("login user information")
+
+  emailExist(decoded.email,(numberofusers,userArray)=>{
+    if(numberofusers>0){
+      console.log("current user")
+      return res.status(201).json({
+        message: 'user information',
+        UserID:userArray[0].UserID,
+        Email:userArray[0].Email,
+        LastLoggedAt:userArray[0].LastLoggedAt,
+        createdAt:userArray[0].createdAt,
+        updatedAt:userArray[0].updatedAt
+      });
+    }else{
+      console.log("no user")
+    }
+  })
+
+
+  //return res.status(201).json(decoded);
+}
+
 exports.signup = (req, res, next) => {
   //register new user
 
@@ -91,7 +116,7 @@ exports.login = (req, res, next) => {
   //register new user
   // check input values
   req.check('email','Invalid email address').isEmail();
-  req.check('password','password is invalid or to short').isLength({min:6}).equals(req.body.password);
+  req.check('password','password is invalid or to short').isLength({min:3}).equals(req.body.password);
   var errors = req.validationErrors();
   if(errors){
     req.session.error = errors;

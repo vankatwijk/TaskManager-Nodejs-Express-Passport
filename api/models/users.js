@@ -8,6 +8,14 @@ module.exports = (sequelize, DataTypes) => {
     },
     PasswordHash: DataTypes.STRING,
     Email: DataTypes.STRING,
+    FirstName: DataTypes.STRING,
+    LastName: DataTypes.STRING,
+    Address: DataTypes.STRING,
+    DateOfBirth: DataTypes.DATE,
+    PostalCode: DataTypes.STRING,
+    KYC: DataTypes.STRING,
+    AgentAccount: DataTypes.STRING,
+    IsAdmin: DataTypes.BOOLEAN,
     LastLoggedAt:DataTypes.DATE
   }, {});
   Users.associate = function(models) {
