@@ -84,7 +84,8 @@ exports.signup = (req, res, next) => {
         }else{
           models.Users.build({
             Email: newuser.email,
-            PasswordHash: hash
+            PasswordHash: hash,
+            IsAdmin:0
           })
           .save()
           .then(function(task){
@@ -113,7 +114,6 @@ exports.signup = (req, res, next) => {
 }
 
 exports.login = (req, res, next) => {
-  //register new user
   // check input values
   req.check('email','Invalid email address').isEmail();
   req.check('password','password is invalid or to short').isLength({min:3}).equals(req.body.password);
@@ -132,7 +132,7 @@ exports.login = (req, res, next) => {
   emailExist(loginuser.email,(numberofusers,userArray)=>{
     console.log("number of users : "+numberofusers);
     //check if user exist
-    if(numberofusers>0){
+    if((numberofusers > 0) && (userArray[0].IsAdmin == false)) {
       console.log("user already exist ")
       //check if password entered is the same as in the database
 
