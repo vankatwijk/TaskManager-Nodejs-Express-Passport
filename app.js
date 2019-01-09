@@ -14,7 +14,8 @@ const productRoutes =  require('./api/routes/products');
 const users =  require('./api/routes/users');
 const traders =  require('./api/routes/traders');
 const admins =  require('./api/routes/admin');
-//const roles =  require('./api/routes/roles');
+const roles =  require('./api/routes/roles');
+const regions =  require('./api/routes/regions');
 
 app.use(morgan('dev'));// format for morgan logging
 app.use(bodyParser.urlencoded({extended:false}));
@@ -42,7 +43,8 @@ app.use('/products',productRoutes);
 app.use('/users',users);
 app.use('/traders',traders);
 app.use('/admin',admins);
-//app.use('/admin',roles);
+app.use('/roles',roles);
+app.use('/regions',regions);
 
 
 //error handling

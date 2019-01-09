@@ -8,6 +8,7 @@ const checkAuth = require('../middleware/check-auth');
 router.get('/',checkAuth,userController.getuserinfo);
 router.post('/signup',userController.signup);
 router.post('/login',userController.login);
+router.patch('/',checkAuth, userController.patch);//protected route
 
 
 

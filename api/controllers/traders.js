@@ -44,6 +44,8 @@ exports.getuserinfo = (req , res, next ) => {
   //return res.status(201).json(decoded);
 }
 
+
+
 exports.signup = (req, res, next) => {
   //register new user
 
@@ -60,7 +62,13 @@ exports.signup = (req, res, next) => {
   // if check is okay start inserting new user
   const newuser = {
     email: req.body.email,
-    password: req.body.password
+    password: req.body.password,
+    FirstName: (req.body.hasOwnProperty('firstname') ? req.body.firstname:''),
+    LastName: (req.body.hasOwnProperty('lastname') ? req.body.lastname : ''),
+    Address: (req.body.hasOwnProperty('address') ? req.body.address : ''),
+    DateofBirth: (req.body.hasOwnProperty('dateofbirth') ? req.body.dateofbirth : ''),
+    PostalCode: (req.body.hasOwnProperty('postalcode') ? req.body.postalcode : ''),
+    KYC:'0'
   }
 
   emailExist(newuser.email,(numberofusers,userArray)=>{
@@ -85,7 +93,13 @@ exports.signup = (req, res, next) => {
           models.Users.build({
             Email: newuser.email,
             PasswordHash: hash,
-            IsAdmin:0
+            IsAdmin:0,
+            FirstName: newuser.FirstName,
+            LastName: newuser.LastName,
+            Address: newuser.Address,
+            DateofBirth: newuser.DateofBirth,
+            PostalCode: newuser.PostalCode,
+            KYC: newuser.KYC
           })
           .save()
           .then(function(task){
@@ -185,5 +199,16 @@ exports.login = (req, res, next) => {
   }
 
 })
+
+}
+exports.patch = (req, res, next) => {
+  //must be login first
+  //jwt header must be set
+
+  console.log('---------');
+  console.log(req.userData);
+  console.log('---------');
+
+
 
 }
