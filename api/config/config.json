@@ -1,8 +1,8 @@
 {
   "development": {
-    "username": "root",
-    "password": "pieter8883",
-    "database": "kenmoreApi",
+    "username": "",
+    "password": "",
+    "database": "",
     "host": "127.0.0.1",
     "dialect": "mysql",
     "operatorsAliases":"false"
