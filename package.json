@@ -24,6 +24,6 @@
   },
   "devDependencies": {
     "nodemon": "^1.18.7",
-    "ws": "3.3.2"
+    "ws": "5.2.3"
   }
 }
